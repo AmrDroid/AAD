@@ -1,23 +1,24 @@
-package com.amrmustafa.AAD;
+package com.amrmustafa.AAD.post;
 
-import com.amrmustafa.AAD.model.LearningLeader_Model;
+
+import com.amrmustafa.AAD.Constants;
 import com.amrmustafa.AAD.model.Post;
-import com.amrmustafa.AAD.model.Skill_IQ_Model;
-
-import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 
-public interface ApiInterface {
-    @GET("api/skilliq")
-    Call<List<Skill_IQ_Model>> getSkill();
+/**
+ * Created by Chike on 12/3/2016.
+ */
 
-    @GET("api/hours")
-    Call<List<LearningLeader_Model>> getLearner();
+public interface APIService {
+
     @POST("/1FAIpQLSf9d1TcNU6zc6KR8bSEM41Z1g1zl35cwZr2xyjIhaMAz8WChQ/formResponse")
     @FormUrlEncoded
     Call<Post> savePost(@Field(Constants.Email_Address) String email,
@@ -27,6 +28,8 @@ public interface ApiInterface {
                         @Field(Constants.Last_Name) String lName,
 
                         @Field(Constants.Link_to_project) String linktoproject);
+
+
 
 }
 

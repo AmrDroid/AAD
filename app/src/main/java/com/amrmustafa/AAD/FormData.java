@@ -1,20 +1,20 @@
 package com.amrmustafa.AAD;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import com.amrmustafa.AAD.post.APIService;
+import com.amrmustafa.AAD.post.ApiUtils;
+import com.amrmustafa.AAD.model.Post;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,20 +22,35 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+
 public class FormData extends AppCompatActivity {
 
     ProgressDialog progressDialog;
-    FloatingActionButton fab;
     EditText edtEmail, edtName,edtLastName,edtLinkToProject;
     Button sendRequest;
     RequestQueue queue;
-ImageButton toolbar_back;
+
+
+
+
+
+    //////////
+    private APIService mAPIService;
+
+
+
+
+
+
+
+    ImageButton toolbar_back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,16 +74,24 @@ ImageButton toolbar_back;
 
         queue = Volley.newRequestQueue(getApplicationContext());
 
+        mAPIService = ApiUtils.getAPIService();
+
+
         sendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (edtName.getText().toString().trim().length() > 0 && edtLastName.getText().toString().trim().length() > 0
                         && edtEmail.getText().toString().trim().length() > 0 && edtLinkToProject.getText().toString().trim().length() > 0
                 ) {
-                    postData(edtEmail.getText().toString().trim(), edtName.getText().toString().trim()
+//                    postData(edtEmail.getText().toString().trim(), edtName.getText().toString().trim()
+//                    ,edtLastName.getText().toString().trim(),edtLinkToProject.getText().toString().trim());
+
+                    sendPost(edtEmail.getText().toString().trim(), edtName.getText().toString().trim()
                     ,edtLastName.getText().toString().trim(),edtLinkToProject.getText().toString().trim());
+
                 } else {
                     Snackbar.make(v, "Required Fields Missing", Snackbar.LENGTH_LONG).show();
+
                 }
 
             }
@@ -86,6 +109,72 @@ ImageButton toolbar_back;
 
 
 
+    public void showErrorMessage() {
+        Toast.makeText(this, "Failed To Submit Data...", Toast.LENGTH_SHORT).show();
+    }
+
+    public void sendPost(String email, String name,String lName,String url) {
+
+
+        mAPIService.savePost(email, name, lName,url).enqueue(new Callback<Post>() {
+            @Override
+            public void onResponse(Call<Post> call, retrofit2.Response<Post> response) {
+
+                //if(response.isSuccessful())
+                {
+                    //  showResponse(response.body().toString());
+                    Toast.makeText(FormData.this,"Successfully Posted",Toast.LENGTH_LONG).show();
+
+                    Log.i("TAGAAD", "post submitted to API." );
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Post> call, Throwable t) {
+
+                showErrorMessage();
+                Toast.makeText(FormData.this,"Unable to submit post to API",Toast.LENGTH_LONG).show();
+
+                Log.e("TAGAAD", "Unable to submit post to API.");
+            }
+        });
+
+    }
+
+
+
+
+
+    public void showResponse(String response) {
+
+        Toast.makeText(FormData.this, response, Toast.LENGTH_LONG).show();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /////////////////////////////////////////////////////////////////
     public void postData(final String email,final String name,final String lName, final String linkToProject) {
 
         progressDialog.show();
@@ -97,13 +186,14 @@ ImageButton toolbar_back;
                     public void onResponse(String response) {
                         Log.d("TAG", "Response: " + response);
                         if (response.length() > 0) {
-                            Snackbar.make(fab, "Successfully Posted", Snackbar.LENGTH_LONG).show();
+
+                            Toast.makeText(FormData.this,"Successfully Posted",Toast.LENGTH_LONG).show();
                             edtName.setText(null);
                             edtEmail.setText(null);
                             edtLastName.setText(null);
                             edtLinkToProject.setText(null);
                         } else {
-                            Snackbar.make(fab, "Try Again", Snackbar.LENGTH_LONG).show();
+                            Toast.makeText(FormData.this,"Try Again",Toast.LENGTH_LONG).show();
                         }
                         progressDialog.dismiss();
                     }
@@ -112,7 +202,8 @@ ImageButton toolbar_back;
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                Snackbar.make(fab, "Error while Posting Data", Snackbar.LENGTH_LONG).show();
+                Toast.makeText(FormData.this,"Error while Posting Data",Toast.LENGTH_LONG).show();
+
             }
         }) {
             @Override
@@ -132,9 +223,11 @@ ImageButton toolbar_back;
         queue.add(request);
     }
 
-
-
-
+////////////////////////////////////////////////////////
 
 }
+
+
+
+
 
